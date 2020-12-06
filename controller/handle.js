@@ -21,7 +21,7 @@ class request {
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
-        FROM dblibrary.dbo.Stock s 
+        FROM db_Library.dbo.Stock s 
         WHERE s.isbn = ${req.bookId};`
         var data = await request.query(command)
         var message = {
@@ -38,7 +38,7 @@ class request {
         var request = new sql.Request();
         // sql command
         var command = `SELECT s.Book_Name, sr.status_Return 
-        FROM dblibrary.dbo.[Member] m LEFT JOIN dblibrary.dbo.History h ON m.Nation_ID = h.Nation_ID LEFT JOIN dblibrary.dbo.Stock s ON h.isbn = s.isbn LEFT JOIN dblibrary.dbo.StatusReturn sr ON sr.Status_ID = h.Status_ID 
+        FROM db_Library.dbo.[Member] m LEFT JOIN db_Library.dbo.History h ON m.Nation_ID = h.Nation_ID LEFT JOIN db_Library.dbo.Stock s ON h.isbn = s.isbn LEFT JOIN db_Library.dbo.StatusReturn sr ON sr.Status_ID = h.Status_ID 
         WHERE m.Nation_ID = ${req.memberId};`
         var data = await request.query(command)
         var message = {
@@ -65,7 +65,7 @@ class request {
             return message
         }
         // sql command
-        var command = `INSERT INTO dblibrary.dbo.Stock 
+        var command = `INSERT INTO db_Library.dbo.Stock 
         (isbn, Book_Name)
         VALUES(${req.bookId}, '${req.bookName}'); `
         await request.query(command)
@@ -83,7 +83,7 @@ class request {
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
-        FROM dblibrary.dbo.[Member] m
+        FROM db_Library.dbo.[Member] m
         WHERE m.Nation_ID = ${req.memberId};`
         var data = await request.query(command)
         var message = {
@@ -109,7 +109,7 @@ class request {
             return message
         }
         // sql command
-        var command = `INSERT INTO dblibrary.dbo.[Member]
+        var command = `INSERT INTO db_Library.dbo.[Member]
         (Nation_ID, FName, LName, Mem_Sex, Mem_Phone, Mem_Address, Mem_Email)
         VALUES(${req.memberId}, '${req.Fname}','${req.Lname}','${req.sex}','${req.phone}','${req.address}','${req.mail}'); `
         await request.query(command)
@@ -127,7 +127,7 @@ class request {
         var request = new sql.Request();
         // sql command
         var command = `SELECT COUNT(*) as numberOfBook 
-        FROM dblibrary.dbo.[Member] m LEFT JOIN dblibrary.dbo.History h ON m.Nation_ID = h.Nation_ID LEFT JOIN dblibrary.dbo.Stock s ON h.isbn = s.isbn LEFT JOIN dblibrary.dbo.StatusReturn sr ON sr.Status_ID = h.Status_ID 
+        FROM db_Library.dbo.[Member] m LEFT JOIN db_Library.dbo.History h ON m.Nation_ID = h.Nation_ID LEFT JOIN db_Library.dbo.Stock s ON h.isbn = s.isbn LEFT JOIN db_Library.dbo.StatusReturn sr ON sr.Status_ID = h.Status_ID 
         WHERE m.Nation_ID = ${req.memberId} AND h.Status_ID = 'ST02'
         GROUP BY m.Nation_ID;`
         var data = await request.query(command)
@@ -144,7 +144,7 @@ class request {
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
-        FROM dblibrary.dbo.History h
+        FROM db_Library.dbo.History h
         WHERE h.isbn = ${req.bookId} AND h.Status_ID = '${status}';`
         var data = await request.query(command)
         var message = {
@@ -197,18 +197,21 @@ class request {
         }
         //checkHistory
         var checkHistory = await this.queryCountHistory(req)
-        logger.debug(checkHistory.message[0].numberOfBook)
-        if(checkHistory.message[0].numberOfBook >= 5){
-            var message = {
-                "status_code": 400,
-                "status": "You cannot borrow the book because you borrow more than 5 books.",
-                "message": "You cannot borrow the book because you borrow more than 5 books."
+        logger.debug(checkHistory)
+        //logger.debug(checkHistory.message[0].numberOfBook)
+        if(checkHistory.message[0] != null){
+            if( checkHistory.message[0] != null || checkHistory.message[0].numberOfBook >= 5  ){
+                var message = {
+                    "status_code": 400,
+                    "status": "You cannot borrow the book because you borrow more than 5 books.",
+                    "message": "You cannot borrow the book because you borrow more than 5 books."
+                }
+                logger.info(message.status)
+                return message
             }
-            logger.info(message.status)
-            return message
         }
         // sql command
-        var command = `INSERT INTO dblibrary.dbo.History
+        var command = `INSERT INTO db_Library.dbo.History
         (History_ID, Nation_ID, isbn, Status_ID)
         VALUES('${req.historyId}', '${req.memberId}', '${req.bookId}', 'ST02'); `
         await request.query(command)
@@ -260,7 +263,7 @@ class request {
             return message
         }
         // sql command
-        var command = `UPDATE dblibrary.dbo.History 
+        var command = `UPDATE db_Library.dbo.History 
         SET Status_ID= 'ST01' 
         WHERE Nation_ID='${req.memberId}' AND isbn='${req.bookId}'; `
         await request.query(command)
