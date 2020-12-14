@@ -2,9 +2,11 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const logger = require('./util/logger.js');
+const cors = require('cors');
 //const swaggerUi = require('swagger-ui-express');
 //const swaggerDocument = require('./swagger/swagger.json');
-app.get('/', (req, res) => {
+app.use(cors());
+app.get('/test', (req, res) => {
     res.send('BANK THE GOD');
 })
 
@@ -19,7 +21,7 @@ app.use(bodyParser.urlencoded({
 
 app.use('/', require('./router/index'));
 
-const port = 3000;
+const port = 5000;
 const server = app.listen(port, () => {
     logger.info(`[API] Server ready @localhost:${port}`);
     logger.info('[Swagger] http://localhost:' + port + '/api-docs/')

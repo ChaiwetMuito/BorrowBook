@@ -1,4 +1,5 @@
 const logger = require('../util/logger.js');
+var shortid = require('shortid');
 const sql = require("mssql");
 const moment = require('moment');
 // config for your database
@@ -17,13 +18,31 @@ class request {
     
 
     async queryBookById(req){
-        let functionName = '[allBook]' //ชื่อ function
+        let functionName = '[queryBookById]' //ชื่อ function
+        if( req.bookId == null || req.bookId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
         FROM db_Library.dbo.Stock s 
         WHERE s.isbn = ${req.bookId};`
         var data = await request.query(command)
+        if(data.recordset[0] == null){
+            var message = {
+                "status_code": 400,
+                "status": "Can't find the book",
+                "message": "Can't find the book"
+            }
+            logger.info(message.status)
+            return message
+        }
         var message = {
             "status_code": 200,
             "status": "select book success",
@@ -35,6 +54,15 @@ class request {
 
     async queryHistory(req){
         let functionName = '[queryHistory]' //ชื่อ function
+        if(req.memberId == null || req.memberId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         // sql command
         var command = `SELECT s.Book_Name, sr.status_Return 
@@ -52,6 +80,15 @@ class request {
 
     async addBook(req){
         let functionName = '[addBook]' //ชื่อ function
+        if( req.bookId == null || req.bookName == null ||req.bookId == "" || req.bookName == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         var checkBook = await this.queryBookById(req)
         //logger.debug(checkBook)
@@ -73,13 +110,22 @@ class request {
         var message = {
             "status_code": 200,
             "status": "add book success",
-            "message": data.message
+            "message": "add book success"
         }
         logger.info(message.status)
         return message
     }
     async queryMemberById(req){
         let functionName = '[queryMemberById]' //ชื่อ function
+        if(req.memberId == null || req.memberId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
@@ -97,6 +143,25 @@ class request {
 
     async addMember(req){
         let functionName = '[addMember]' //ชื่อ function
+        if( req.sex.toLowerCase() != "male" && req.sex.toLowerCase() != "female"){
+            var message = {
+                "status_code": 400,
+                "status": "Please enter gender, be male or female.",
+                "message": "Please enter gender, be male or female."
+            }
+            logger.info(message.status)
+            return message
+        }
+        if(req.Fname == null || req.Lname == null || req.memberId == null || req.sex == null || req.phone == null || req.address == null || req.mail == null||
+            req.Fname == "" || req.Lname == "" || req.memberId == "" || req.sex == "" || req.phone == "" || req.address == "" || req.mail == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         var checkMem = await this.queryMemberById(req)
         if(checkMem.message != null){
@@ -111,19 +176,30 @@ class request {
         // sql command
         var command = `INSERT INTO db_Library.dbo.[Member]
         (Nation_ID, FName, LName, Mem_Sex, Mem_Phone, Mem_Address, Mem_Email)
-        VALUES(${req.memberId}, '${req.Fname}','${req.Lname}','${req.sex}','${req.phone}','${req.address}','${req.mail}'); `
+        VALUES(${req.memberId}, '${req.Fname}','${req.Lname}','${req.sex.toLowerCase()}','${req.phone}','${req.address}','${req.mail}'); `
         await request.query(command)
         var data = await this.queryMemberById(req)
-        var message = {
-            "status_code": 200,
-            "status": "add Member success",
-            "message": data.message
-        }
+        if(data.message != null){
+            var message = {
+                "status_code": 200,
+                "status": "add Member success",
+                "message": "Add Member success"
+            }
         logger.info(message.status)
         return message
+        }
     }
     async queryCountHistory(req){
         let functionName = '[queryHistory]' //ชื่อ function
+        if(req.memberId == null || req.memberId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         // sql command
         var command = `SELECT COUNT(*) as numberOfBook 
@@ -141,6 +217,15 @@ class request {
     }
     async checkBookHis(req, status){
         let functionName = '[checkBook]' //ชื่อ function
+        if(req.bookId == null || req.bookId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         // sql command
         var command = `SELECT *
@@ -158,6 +243,15 @@ class request {
 
     async borrowBook(req){
         let functionName = '[borrowBook]' //ชื่อ function
+        if(req.memberId == null ||  req.bookId == null || req.memberId == "" ||   req.bookId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         var checkBook = await this.queryBookById(req)
         logger.debug("checkBook")
@@ -200,7 +294,7 @@ class request {
         logger.debug(checkHistory)
         //logger.debug(checkHistory.message[0].numberOfBook)
         if(checkHistory.message[0] != null){
-            if( checkHistory.message[0] != null || checkHistory.message[0].numberOfBook >= 5  ){
+            if( checkHistory.message[0].numberOfBook >= 5  ){
                 var message = {
                     "status_code": 400,
                     "status": "You cannot borrow the book because you borrow more than 5 books.",
@@ -213,7 +307,7 @@ class request {
         // sql command
         var command = `INSERT INTO db_Library.dbo.History
         (History_ID, Nation_ID, isbn, Status_ID)
-        VALUES('${req.historyId}', '${req.memberId}', '${req.bookId}', 'ST02'); `
+        VALUES('${shortid.generate()}', '${req.memberId}', '${req.bookId}', 'ST02'); `
         await request.query(command)
         //var data = await this.queryHistory(req)
         var message = {
@@ -227,6 +321,15 @@ class request {
 
     async returnBook(req){
         let functionName = '[returnBook]' //ชื่อ function
+        if( req.memberId == null || req.bookId == null || req.memberId == "" || req.bookId == ""){
+            var message = {
+                "status_code": 400,
+                "status": "Please complete all information.",
+                "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
         var request = new sql.Request();
         var checkBook = await this.queryBookById(req)
         if(checkBook.message == null){
