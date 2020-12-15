@@ -34,15 +34,15 @@ class request {
         FROM db_Library.dbo.Stock s 
         WHERE s.isbn = ${req.bookId};`
         var data = await request.query(command)
-        if(data.recordset[0] == null){
-            var message = {
-                "status_code": 400,
-                "status": "Can't find the book",
-                "message": "Can't find the book"
-            }
-            logger.info(message.status)
-            return message
-        }
+        // if(data.recordset[0] == null){
+        //     var message = {
+        //         "status_code": 400,
+        //         "status": "Can't find the book",
+        //         "message": "Can't find the book"
+        //     }
+        //     logger.info(message.status)
+        //     return message
+        // }
         var message = {
             "status_code": 200,
             "status": "select book success",
@@ -143,21 +143,22 @@ class request {
 
     async addMember(req){
         let functionName = '[addMember]' //ชื่อ function
-        if( req.sex.toLowerCase() != "male" && req.sex.toLowerCase() != "female"){
-            var message = {
-                "status_code": 400,
-                "status": "Please enter gender, be male or female.",
-                "message": "Please enter gender, be male or female."
-            }
-            logger.info(message.status)
-            return message
-        }
+        
         if(req.Fname == null || req.Lname == null || req.memberId == null || req.sex == null || req.phone == null || req.address == null || req.mail == null||
             req.Fname == "" || req.Lname == "" || req.memberId == "" || req.sex == "" || req.phone == "" || req.address == "" || req.mail == ""){
             var message = {
                 "status_code": 400,
                 "status": "Please complete all information.",
                 "message": "Please complete all information."
+            }
+            logger.info(message.status)
+            return message
+        }
+        if( req.sex.toLowerCase() != "male" && req.sex.toLowerCase() != "female"){
+            var message = {
+                "status_code": 400,
+                "status": "Please enter gender, be male or female.",
+                "message": "Please enter gender, be male or female."
             }
             logger.info(message.status)
             return message
